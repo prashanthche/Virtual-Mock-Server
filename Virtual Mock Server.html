@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Load Testing Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 0.5rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin: 1.5rem 0;
+        }
+        
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            margin: 1rem 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background: #e01b74;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light);
+        }
+        
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background-color: #4cc9f0;
+        }
+        
+        .status-offline {
+            background-color: var(--gray);
+        }
+        
+        .log-container {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace;
+            margin: 1rem 0;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .log-info {
+            color: #4cc9f0;
+        }
+        
+        .log-warning {
+            color: #f72585;
+        }
+        
+        .log-success {
+            color: #4ade80;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>API Load Testing Dashboard</h1>
+            <p class="subtitle">Test your API endpoints with k6 and avoid rate limiting issues</p>
+        </header>
+        
+        <div class="grid">
+            <div class="stat-card">
+                <div class="stat-label">Virtual Users</div>
+                <div class="stat-value" id="vus">5</div>
+                <input type="range" min="1" max="50" value="5" class="slider" id="vus-slider">
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Test Duration</div>
+                <div class="stat-value" id="duration">30s</div>
+                <input type="range" min="10" max="120" value="30" class="slider" id="duration-slider">
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Success Rate</div>
+                <div class="stat-value" id="success-rate">98.7%</div>
+                <div class="stat-label">Last Test</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" data-tab="dashboard">Dashboard</div>
+                <div class="tab" data-tab="setup">Setup Instructions</div>
+                <div class="tab" data-tab="mock-api">Mock API Server</div>
+            </div>
+            
+            <div class="tab-content active" id="dashboard-tab">
+                <h2 class="card-title">Performance Metrics</h2>
+                
+                <div class="chart-container">
+                    <canvas id="response-time-chart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="requests-chart"></canvas>
+                </div>
+                
+                <button class="btn" id="run-test">Run Load Test</button>
+                <button class="btn btn-warning" id="stop-test">Stop Test</button>
+            </div>
+            
+            <div class="tab-content" id="setup-tab">
+                <h2 class="card-title">k6 Setup Instructions</h2>
+                
+                <p>To avoid rate limiting issues with external APIs like ReqRes, set up a local mock server:</p>
+                
+                <h3>1. Install JSON Server</h3>
+                <div class="code-block">
+                    npm install -g json-server
+                </div>
+                
+                <h3>2. Create a db.json file</h3>
+                <div class="code-block">
+                    {
+                      "login": { 
+                        "token": "test123" 
+                      },
+                      "users": [
+                        { "id": 1, "name": "John Doe", "email": "john@example.com" },
+                        { "id": 2, "name": "Jane Smith", "email": "jane@example.com" }
+                      ]
+                    }
+                </div>
+                
+                <h3>3. Start the JSON Server</h3>
+                <div class="code-block">
+                    json-server --watch db.json --port 3001
+                </div>
+                
+                <h3>4. Update your k6 script</h3>
+                <div class="code-block">
+                    const API_BASE_URL = 'http://localhost:3001';
+                </div>
+            </div>
+            
+            <div class="tab-content" id="mock-api-tab">
+                <h2 class="card-title">Mock API Server Status</h2>
+                
+                <p>Status: <span class="status-indicator status-offline"></span> Offline</p>
+                
+                <button class="btn" id="start-mock">Start Mock Server</button>
+                
+                <h3>Server Logs</h3>
+                <div class="log-container" id="server-logs">
+                    <div class="log-entry">[INFO] Mock server not running</div>
+                </div>
+                
+                <h3>Test Endpoints</h3>
+                <div class="code-block">
+                    // Login endpoint
+                    POST http://localhost:3001/login
+                    {
+                      "email": "test@example.com",
+                      "password": "password123"
+                    }
+                    
+                    // Users endpoint
+                    GET http://localhost:3001/users/1
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Test Results</h2>
+            
+            <div class="log-container" id="test-logs">
+                <div class="log-entry log-info">[INFO] Ready to run load tests</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>API Load Testing Dashboard • Built with k6 and Chart.js</p>
+        </footer>
+    </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // Slider functionality
+        const vusSlider = document.getElementById('vus-slider');
+        const vusValue = document.getElementById('vus');
+        const durationSlider = document.getElementById('duration-slider');
+        const durationValue = document.getElementById('duration');
+        
+        vusSlider.addEventListener('input', () => {
+            vusValue.textContent = vusSlider.value;
+        });
+        
+        durationSlider.addEventListener('input', () => {
+            durationValue.textContent = `${durationSlider.value}s`;
+        });
+        
+        // Chart initialization
+        const responseTimeCtx = document.getElementById('response-time-chart').getContext('2d');
+        const responseTimeChart = new Chart(responseTimeCtx, {
+            type: 'line',
+            data: {
+                labels: ['0s', '5s', '10s', '15s', '20s', '25s', '30s'],
+                datasets: [{
+                    label: 'Response Time (ms)',
+                    data: [120, 115, 125, 130, 122, 118, 125],
+                    borderColor: '#4361ee',
+                    tension: 0.3,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Response Time Over Duration'
+                    }
+                }
+            }
+        });
+        
+        const requestsCtx = document.getElementById('requests-chart').getContext('2d');
+        const requestsChart = new Chart(requestsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Login', 'Get User', 'Create', 'Update', 'Delete'],
+                datasets: [{
+                    label: 'Requests per Second',
+                    data: [45, 52, 36, 28, 15],
+                    backgroundColor: '#4cc9f0'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Request Rate by Endpoint'
+                    }
+                }
+            }
+        });
+        
+        // Mock server functionality
+        document.getElementById('start-mock').addEventListener('click', () => {
+            const logs = document.getElementById('server-logs');
+            logs.innerHTML = '';
+            
+            const addLog = (message, type = 'info') => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = message;
+                logs.appendChild(logEntry);
+                logs.scrollTop = logs.scrollHeight;
+            };
+            
+            addLog('[INFO] Starting mock server on port 3001...');
+            
+            setTimeout(() => {
+                addLog('[SUCCESS] Mock server started successfully');
+                addLog('[INFO] Endpoints available:');
+                addLog('[INFO] GET  /login');
+                addLog('[INFO] POST /users');
+                addLog('[INFO] GET  /users/:id');
+                
+                document.querySelector('#mock-api-tab .status-indicator').className = 'status-indicator status-online';
+            }, 1500);
+        });
+        
+        // Test functionality
+        document.getElementById('run-test').addEventListener('click', () => {
+            const logs = document.getElementById('test-logs');
+            logs.innerHTML = '';
+            
+            const addLog = (message, type = 'info') => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = message;
+                logs.appendChild(logEntry);
+                logs.scrollTop = logs.scrollHeight;
+            };
+            
+            const vus = document.getElementById('vus').textContent;
+            const duration = document.getElementById('duration').textContent;
+            
+            addLog(`[INFO] Starting load test with ${vus} VUs for ${duration}`);
+            addLog('[INFO] Initializing virtual users...');
+            
+            // Simulate test progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                
+                if (progress <= 30) {
+                    addLog(`[INFO] ${progress}% complete - ramping up VUs`);
+                } else if (progress <= 70) {
+                    addLog(`[INFO] ${progress}% complete - steady state`);
+                } else if (progress < 100) {
+                    addLog(`[INFO] ${progress}% complete - ramping down`);
+                } else {
+                    addLog('[SUCCESS] Test completed successfully');
+                    addLog('[INFO] 98.7% of requests succeeded');
+                    addLog('[INFO] Average response time: 124ms');
+                    clearInterval(interval);
+                    
+                    // Update success rate with a random value between 95% and 100%
+                    document.getElementById('success-rate').textContent = 
+                        (95 + Math.random() * 5).toFixed(1) + '%';
+                }
+            }, 500);
+            
+            // Allow stopping the test
+            document.getElementById('stop-test').addEventListener('click', () => {
+                clearInterval(interval);
+                addLog('[WARNING] Test stopped by user');
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
