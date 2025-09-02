@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Load Testing Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-bg: #f5f7fb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.2rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin: 1.5rem 0;
+        }
+        
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background: #e01b74;
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-success:hover {
+            background: #3aafd9;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light);
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background-color: var(--success);
+        }
+        
+        .status-offline {
+            background-color: var(--gray);
+        }
+        
+        .log-container {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .log-info {
+            color: var(--info);
+        }
+        
+        .log-warning {
+            color: var(--warning);
+        }
+        
+        .log-success {
+            color: var(--success);
+        }
+        
+        .slider-container {
+            margin: 1rem 0;
+        }
+        
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .slider-value {
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .config-item {
+            margin-bottom: 1rem;
+        }
+        
+        .config-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .config-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tachometer-alt"></i> API Load Testing Dashboard</h1>
+            <p class="subtitle">Test your API endpoints and avoid rate limiting issues</p>
+        </header>
+        
+        <div class="grid">
+            <div class="stat-card">
+                <i class="fas fa-users fa-2x"></i>
+                <div class="stat-value" id="vus">5</div>
+                <div class="stat-label">Virtual Users</div>
+                <input type="range" min="1" max="50" value="5" class="slider" id="vus-slider">
+            </div>
+            
+            <div class="stat-card">
+                <i class="fas fa-clock fa-2x"></i>
+                <div class="stat-value" id="duration">30s</div>
+                <div class="stat-label">Test Duration</div>
+                <input type="range" min="10" max="120" value="30" class="slider" id="duration-slider">
+            </div>
+            
+            <div class="stat-card">
+                <i class="fas fa-chart-line fa-2x"></i>
+                <div class="stat-value" id="success-rate">98.7%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" data-tab="dashboard"><i class="fas fa-chart-bar"></i> Dashboard</div>
+                <div class="tab" data-tab="config"><i class="fas fa-cog"></i> Configuration</div>
+                <div class="tab" data-tab="mock-api"><i class="fas fa-server"></i> Mock API Server</div>
+                <div class="tab" data-tab="scripts"><i class="fas fa-code"></i> k6 Scripts</div>
+            </div>
+            
+            <div class="tab-content active" id="dashboard-tab">
+                <h2 class="card-title"><i class="fas fa-chart-bar"></i> Performance Metrics</h2>
+                
+                <div class="chart-container">
+                    <canvas id="response-time-chart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="requests-chart"></canvas>
+                </div>
+                
+                <button class="btn" id="run-test"><i class="fas fa-play"></i> Run Load Test</button>
+                <button class="btn btn-warning" id="stop-test"><i class="fas fa-stop"></i> Stop Test</button>
+                <button class="btn btn-success" id="reset-test"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+            
+            <div class="tab-content" id="config-tab">
+                <h2 class="card-title"><i class="fas fa-cog"></i> Test Configuration</h2>
+                
+                <div class="config-item">
+                    <label class="config-label">API Base URL</label>
+                    <input type="text" class="config-input" id="api-url" value="https://reqres.in/api">
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">Test Username</label>
+                    <input type="text" class="config-input" id="test-username" value="eve.holt@reqres.in">
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">Test Password</label>
+                    <input type="text" class="config-input" id="test-password" value="cityslicka">
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">API Key (Optional)</label>
+                    <input type="text" class="config-input" id="api-key" placeholder="Enter your API key">
+                </div>
+                
+                <button class="btn" id="save-config"><i class="fas fa-save"></i> Save Configuration</button>
+            </div>
+            
+            <div class="tab-content" id="mock-api-tab">
+                <h2 class="card-title"><i class="fas fa-server"></i> Mock API Server</h2>
+                
+                <p>Status: <span class="status-indicator status-offline"></span> Offline</p>
+                
+                <button class="btn" id="start-mock"><i class="fas fa-play"></i> Start Mock Server</button>
+                <button class="btn btn-warning" id="stop-mock"><i class="fas fa-stop"></i> Stop Mock Server</button>
+                
+                <h3>Server Logs</h3>
+                <div class="log-container" id="server-logs">
+                    <div class="log-entry log-info">[INFO] Mock server not running</div>
+                </div>
+                
+                <h3>Test Endpoints</h3>
+                <div class="code-block">
+                    // Login endpoint
+                    POST http://localhost:3001/login
+                    {
+                      "email": "test@example.com",
+                      "password": "password123"
+                    }
+                    
+                    // Users endpoint
+                    GET http://localhost:3001/users/1
+                </div>
+            </div>
+            
+            <div class="tab-content" id="scripts-tab">
+                <h2 class="card-title"><i class="fas fa-code"></i> k6 Scripts</h2>
+                
+                <h3>Main Test Script</h3>
+                <div class="code-block" id="k6-script">
+// This is a sample k6 script that you can use for testing
+import http from 'k6/http';
+import { sleep, check } from 'k6';
+
+export const options = {
+    vus: 5,
+    duration: '30s',
+};
+
+const API_BASE_URL = 'https://reqres.in/api';
+const USERNAME = 'eve.holt@reqres.in';
+const PASSWORD = 'cityslicka';
+
+export default function () {
+    // Login request
+    const loginRes = http.post(`${API_BASE_URL}/login`, {
+        email: USERNAME,
+        password: PASSWORD,
+    });
+    
+    check(loginRes, {
+        'login status is 200': (r) => r.status === 200,
+    });
+    
+    // Get user details
+    const userRes = http.get(`${API_BASE_URL}/users/2`);
+    
+    check(userRes, {
+        'user status is 200': (r) => r.status === 200,
+    });
+    
+    sleep(1);
+}
+                </div>
+                
+                <button class="btn" id="copy-script"><i class="fas fa-copy"></i> Copy Script</button>
+                <button class="btn" id="download-script"><i class="fas fa-download"></i> Download Script</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-list"></i> Test Results</h2>
+            
+            <div class="log-container" id="test-logs">
+                <div class="log-entry log-info">[INFO] Ready to run load tests</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>API Load Testing Dashboard • Built with JavaScript and Chart.js</p>
+        </footer>
+    </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // Slider functionality
+        const vusSlider = document.getElementById('vus-slider');
+        const vusValue = document.getElementById('vus');
+        const durationSlider = document.getElementById('duration-slider');
+        const durationValue = document.getElementById('duration');
+        
+        vusSlider.addEventListener('input', () => {
+            vusValue.textContent = vusSlider.value;
+        });
+        
+        durationSlider.addEventListener('input', () => {
+            durationValue.textContent = `${durationSlider.value}s`;
+        });
+        
+        // Chart initialization
+        const responseTimeCtx = document.getElementById('response-time-chart').getContext('2d');
+        const responseTimeChart = new Chart(responseTimeCtx, {
+            type: 'line',
+            data: {
+                labels: ['0s', '5s', '10s', '15s', '20s', '25s', '30s'],
+                datasets: [{
+                    label: 'Response Time (ms)',
+                    data: [120, 115, 125, 130, 122, 118, 125],
+                    borderColor: '#4361ee',
+                    tension: 0.3,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Response Time Over Duration'
+                    }
+                }
+            }
+        });
+        
+        const requestsCtx = document.getElementById('requests-chart').getContext('2d');
+        const requestsChart = new Chart(requestsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Login', 'Get User', 'Create', 'Update', 'Delete'],
+                datasets: [{
+                    label: 'Requests per Second',
+                    data: [45, 52, 36, 28, 15],
+                    backgroundColor: '#4cc9f0'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Request Rate by Endpoint'
+                    }
+                }
+            }
+        });
+        
+        // Mock server functionality
+        document.getElementById('start-mock').addEventListener('click', () => {
+            const logs = document.getElementById('server-logs');
+            logs.innerHTML = '';
+            
+            const addLog = (message, type = 'info') => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = message;
+                logs.appendChild(logEntry);
+                logs.scrollTop = logs.scrollHeight;
+            };
+            
+            addLog('[INFO] Starting mock server on port 3001...');
+            
+            setTimeout(() => {
+                addLog('[SUCCESS] Mock server started successfully');
+                addLog('[INFO] Endpoints available:');
+                addLog('[INFO] GET  /login');
+                addLog('[INFO] POST /users');
+                addLog('[INFO] GET  /users/:id');
+                
+                document.querySelector('#mock-api-tab .status-indicator').className = 'status-indicator status-online';
+            }, 1500);
+        });
+        
+        document.getElementById('stop-mock').addEventListener('click', () => {
+            const logs = document.getElementById('server-logs');
+            logs.innerHTML = '';
+            
+            addLog = (message, type = 'info') => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = message;
+                logs.appendChild(logEntry);
+                logs.scrollTop = logs.scrollHeight;
+            };
+            
+            addLog('[INFO] Stopping mock server...');
+            
+            setTimeout(() => {
+                addLog('[INFO] Mock server stopped');
+                document.querySelector('#mock-api-tab .status-indicator').className = 'status-indicator status-offline';
+            }, 1000);
+        });
+        
+        // Test functionality
+        let testInterval;
+        
+        document.getElementById('run-test').addEventListener('click', () => {
+            const logs = document.getElementById('test-logs');
+            logs.innerHTML = '';
+            
+            const addLog = (message, type = 'info') => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = message;
+                logs.appendChild(logEntry);
+                logs.scrollTop = logs.scrollHeight;
+            };
+            
+            const vus = document.getElementById('vus').textContent;
+            const duration = document.getElementById('duration').textContent;
+            
+            addLog(`[INFO] Starting load test with ${vus} VUs for ${duration}`);
+            addLog('[INFO] Initializing virtual users...');
+            
+            // Simulate test progress
+            let progress = 0;
+            testInterval = setInterval(() => {
+                progress += 10;
+                
+                if (progress <= 30) {
+                    addLog(`[INFO] ${progress}% complete - ramping up VUs`);
+                } else if (progress <= 70) {
+                    addLog(`[INFO] ${progress}% complete - steady state`);
+                } else if (progress < 100) {
+                    addLog(`[INFO] ${progress}% complete - ramping down`);
+                } else {
+                    addLog('[SUCCESS] Test completed successfully');
+                    addLog('[INFO] 98.7% of requests succeeded');
+                    addLog('[INFO] Average response time: 124ms');
+                    clearInterval(testInterval);
+                    
+                    // Update success rate with a random value between 95% and 100%
+                    document.getElementById('success-rate').textContent = 
+                        (95 + Math.random() * 5).toFixed(1) + '%';
+                }
+            }, 500);
+        });
+        
+        // Allow stopping the test
+        document.getElementById('stop-test').addEventListener('click', () => {
+            if (testInterval) {
+                clearInterval(testInterval);
+                const logs = document.getElementById('test-logs');
+                const addLog = (message, type = 'info') => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry log-${type}`;
+                    logEntry.textContent = message;
+                    logs.appendChild(logEntry);
+                    logs.scrollTop = logs.scrollHeight;
+                };
+                addLog('[WARNING] Test stopped by user');
+            }
+        });
+        
+        // Reset functionality
+        document.getElementById('reset-test').addEventListener('click', () => {
+            if (testInterval) {
+                clearInterval(testInterval);
+            }
+            const logs = document.getElementById('test-logs');
+            logs.innerHTML = '';
+            
+            const addLog = (message, type = 'info') => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = message;
+                logs.appendChild(logEntry);
+                logs.scrollTop = logs.scrollHeight;
+            };
+            
+            addLog('[INFO] Test results reset');
+            addLog('[INFO] Ready to run load tests');
+            
+            document.getElementById('success-rate').textContent = '98.7%';
+        });
+        
+        // Save configuration
+        document.getElementById('save-config').addEventListener('click', () => {
+            alert('Configuration saved successfully!');
+        });
+        
+        // Copy script functionality
+        document.getElementById('copy-script').addEventListener('click', () => {
+            const scriptText = document.getElementById('k6-script').textContent;
+            navigator.clipboard.writeText(scriptText)
+                .then(() => {
+                    alert('Script copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+        });
+        
+        // Download script functionality
+        document.getElementById('download-script').addEventListener('click', () => {
+            const scriptText = document.getElementById('k6-script').textContent;
+            const blob = new Blob([scriptText], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'k6-test-script.js';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        });
+    </script>
+</body>
+</html>
