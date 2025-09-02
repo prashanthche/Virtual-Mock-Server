@@ -1,0 +1,133 @@
+The k6 Load Testing Dashboard is a web-based tool designed to make load testing easier and more visual. It helps you simulate API traffic, monitor performance, and manage your k6 test scripts—all from a single browser interface.
+
+With this dashboard, you can quickly spot performance bottlenecks, test APIs without hitting rate limits, and manage virtual users for your simulations.
+
+Features
+
+Real-time Performance Metrics
+Watch how your API responds under load using interactive charts that display response times, request rates, and more.
+
+Test Configuration
+Easily adjust the number of virtual users and test duration with simple sliders.
+
+Mock API Server
+Simulate API endpoints locally to avoid hitting real servers or running into rate limits.
+
+k6 Script Management
+View, copy, and download k6 test scripts to use in your own k6 environment.
+
+Test Logging
+Keep detailed logs of each test execution for later analysis.
+
+Responsive Design
+Works on desktops, laptops, tablets, and mobile devices, so you can monitor tests anywhere.
+
+Installation
+
+Good news: there’s no installation required!
+
+Save the provided HTML code as k6-dashboard.html.
+
+Open it in any modern web browser (Chrome, Firefox, Edge, or Safari).
+
+Usage
+Running Tests
+
+Open the dashboard in your browser.
+
+Adjust the Virtual Users and Test Duration sliders to your preferred settings.
+
+Click the Run Load Test button.
+
+Watch your charts and logs update in real-time.
+
+Configuring Tests
+
+Go to the Configuration tab.
+
+Modify parameters like API Base URL, test credentials, or other settings.
+
+Click Save Configuration to apply changes.
+
+Using the Mock Server
+
+Open the Mock API Server tab.
+
+Click Start Mock Server to run a simulated API server locally.
+
+Use these example endpoints for testing:
+
+POST http://localhost:3001/login
+
+GET http://localhost:3001/users/1
+
+Accessing k6 Scripts
+
+Go to the k6 Scripts tab.
+
+Review the sample test script provided.
+
+Use Copy Script or Download Script to run it in your own k6 setup.
+
+Technical Details
+Technologies Used
+
+HTML5, CSS3, JavaScript (vanilla)
+
+Chart.js for charts and graphs
+
+Font Awesome for icons
+
+Responsive layout using CSS Grid and Flexbox
+
+Browser Compatibility
+
+Chrome 60+
+
+Firefox 55+
+
+Safari 12+
+
+Edge 79+
+
+Troubleshooting
+
+Common Issues
+
+Charts not loading – Check your internet connection; Chart.js is loaded from a CDN.
+
+Mock server not working – The mock server is for simulation only and runs in-browser.
+
+Script copy not working – Some browsers require a user click to allow copying to clipboard.
+
+Need Help?
+
+Open your browser console to check for errors.
+
+Make sure JavaScript is enabled.
+
+Refresh the page and try again.
+
+Customization
+
+You can tweak the dashboard to suit your needs:
+
+Change colors using the :root CSS variables.
+
+Add new chart types in the JavaScript file.
+
+Extend the mock server with more endpoints or data.
+
+License
+
+This project is provided as-is for learning and demonstration purposes.
+
+Contributing
+
+Want to contribute?
+
+Fork the project (if it’s in a repository).
+
+Make your improvements.
+
+Submit a pull request with a clear description of your changes.
