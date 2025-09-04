@@ -1,0 +1,30 @@
+2025-09-04T03:58:11.37062593Z ==> Cloning from https://github.com/prashanthche/Virtual-Mock-Server
+2025-09-04T03:58:11.791705694Z ==> Checking out commit 8686908ebe09ba6417be9b9c345700e2255837b2 in branch main
+2025-09-04T03:58:12.743235374Z ==> Downloading cache...
+2025-09-04T03:58:22.82173283Z ==> Transferred 55MB in 7s. Extraction took 2s.
+2025-09-04T03:58:24.620367469Z ==> Using Node.js version 22.16.0 (default)
+2025-09-04T03:58:24.654270642Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-09-04T03:58:24.739021811Z ==> Running build command 'yarn install'...
+2025-09-04T03:58:25.02821913Z yarn install v1.22.22
+2025-09-04T03:58:25.049130376Z info No lockfile found.
+2025-09-04T03:58:25.054927893Z [1/4] Resolving packages...
+2025-09-04T03:58:25.909371902Z [2/4] Fetching packages...
+2025-09-04T03:58:27.397870374Z [3/4] Linking dependencies...
+2025-09-04T03:58:27.902790517Z [4/4] Building fresh packages...
+2025-09-04T03:58:27.909201605Z success Saved lockfile.
+2025-09-04T03:58:27.912538697Z Done in 2.89s.
+2025-09-04T03:58:28.612149368Z ==> Uploading build...
+2025-09-04T03:58:33.122708156Z ==> Uploaded in 3.5s. Compression took 1.0s
+2025-09-04T03:58:33.210587403Z ==> Build successful 🎉
+2025-09-04T03:58:37.131269025Z ==> Deploying...
+2025-09-04T03:58:46.843128333Z ==> Running 'node server.js'
+2025-09-04T03:58:48.248737013Z JSON Server is running on port 10000
+2025-09-04T03:58:57.749371308Z ==> Your service is live 🎉
+2025-09-04T03:58:57.780969645Z ==> 
+2025-09-04T03:58:57.808782393Z ==> ///////////////////////////////////////////////////////////
+2025-09-04T03:58:57.835485561Z ==> 
+2025-09-04T03:58:57.861812489Z ==> Available at your primary URL https://virtual-mock-server-2.onrender.com
+2025-09-04T03:58:57.888223897Z ==> 
+2025-09-04T03:58:57.914381414Z ==> ///////////////////////////////////////////////////////////
+2025-09-04T04:03:55.335104377Z ==> Detected service running on port 10000
+2025-09-04T04:03:55.478707546Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
